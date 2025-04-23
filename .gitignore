@@ -1,0 +1,5 @@
+# Math related ignores
+*.bbl
+*.log
+*.synxtex.gz
+.Rhistory
