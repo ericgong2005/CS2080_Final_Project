@@ -1,4 +1,5 @@
-~/Math.bbl
-~/Math.log
-~/Math.syntex.gz
-~/.Rhistory
+# Math related ignores
+*.bbl
+*.log
+*.syntex.gz
+.Rhistory
