@@ -37,11 +37,26 @@ from collections import Counter
 # vocab_max_size   = 10000     
 # min_word_freq    = 1      
 
-batch_size       = 64
-seq_len          = 128  # = same as block_size        
-embed_size       = 256       
-nhead            = 8
-hidden_dim       = 512
+# batch_size       = 64
+# seq_len          = 128  # = same as block_size        
+# embed_size       = 256       
+# nhead            = 8
+# hidden_dim       = 512
+# nlayers          = 4
+# dropout          = 0.2
+# learning_rate    = 1e-3      
+# epochs           = 50
+# max_grad_norm    = 1.0
+# noise_multiplier = 2
+# target_delta     = 1e-4
+# vocab_max_size   = 10000     
+# min_word_freq    = 1         
+
+batch_size       = 16
+seq_len          = 32  # = same as block_size        
+embed_size       = 64      
+nhead            = 4
+hidden_dim       = 128
 nlayers          = 4
 dropout          = 0.2
 learning_rate    = 1e-3      
@@ -50,12 +65,13 @@ max_grad_norm    = 1.0
 noise_multiplier = 2
 target_delta     = 1e-4
 vocab_max_size   = 10000     
-min_word_freq    = 1         
+min_word_freq    = 1       
 
 torch.manual_seed(2620)
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("mps" if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # ------------------------
@@ -346,6 +362,7 @@ torch.manual_seed(2620)
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = torch.device("mps" if torch.backends.mps.is_available() else 'cpu')
 print(f"Using device: {device}")
 
 # ------------------------
