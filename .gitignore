@@ -1,5 +1,5 @@
 # Math related ignores
 *.bbl
 *.log
-*.syntex.gz
+*.synxtex.gz
 .Rhistory
