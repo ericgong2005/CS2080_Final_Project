@@ -6,6 +6,7 @@ import re
 import os
 import matplotlib.pyplot as plt
 from datetime import datetime
+from optim import DPSGD  # <-- add at the top
 
 # hyperparameters
 # batch_size = 64
@@ -263,12 +264,23 @@ parameter_count = sum(p.numel() for p in m.parameters())
 print("Number of parameters: ", parameter_count, "\n")
 
 # create a PyTorch optimizer
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+#optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+
+optimizer = DPSGD(
+    named_params=list(model.named_parameters()),
+    lot_size=batch_size,
+    lr=learning_rate,
+    noise_scale=4,        # ← set to 0.0 for no-DP baseline
+    max_grad_norm=1.0,
+    weight_decay=0.0
+)
+
 
 train_losses = []
 val_losses = []
 iteration_steps = []
 
+#THIS FUNCTION IS LLM EDITED!
 for iter in range(iterations):
 
     # Periodically evaluate the loss on train and val sets
@@ -282,11 +294,22 @@ for iter in range(iterations):
     # sample a batch of data
     xb, yb = get_batch('training')
 
-    # evaluate the loss
-    logits, loss = model(xb, yb)
-    optimizer.zero_grad(set_to_none=True)
-    loss.backward()
-    optimizer.step()
+    # compute per-sample gradients
+    per_sample_grads = {name: [] for name, param in model.named_parameters() if param.requires_grad}
+    for i in range(xb.size(0)):
+        model.zero_grad(set_to_none=True)
+        xi = xb[i].unsqueeze(0)
+        yi = yb[i].unsqueeze(0)
+        _, loss = model(xi, yi)
+        loss.backward()
+        for name, param in model.named_parameters():
+            if param.grad is not None:
+                per_sample_grads[name].append(param.grad.detach().clone())
+    per_sample_grads = {name: torch.stack(grads) for name, grads in per_sample_grads.items()}
+
+    # step with DPSGD
+    optimizer.step(per_sample_grads)
+
 
 # Plot the Training and Validation Loss
 current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')

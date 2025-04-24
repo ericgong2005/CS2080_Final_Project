@@ -1,0 +1,14 @@
+PROPERTIES:
+	Batch size: 16
+	Block size: 8
+	Iterations: 100
+	Learning rate: 0.01
+	Embeddings: 1
+	Heads: 100
+	Layers: 1
+	Parameters: 84746
+	Device: mps
+
+START OF GENERATION:The cat in the hattallmilkcouldpickedshestringbooksmakedidatfanbewetdeartreeaslikehearoneanymebumpcouldoutthumpsthemintoalwayshighkindsridthankanywherekitesredouthititshowhopsthissammilkhitfuntwosunnycupintogetboatsaidfallcallgowayshookusamgonebetrun
+somethingnewwentmakeplopfish,walltricks.thereshookkinds'hallyeshavedeartrainwasallwhatfearsomethingwentboatwhatmewe
+whitetwomousehisshakeandhook
