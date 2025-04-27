@@ -1,0 +1,18 @@
+PROPERTIES:
+	Batch size: 16
+	Block size: 8
+	Iterations: 100
+	Learning rate: 0.001
+	Embeddings: 4
+	Heads: 100
+	Layers: 4
+	Parameters: 73307
+\Optimizer: SGD
+	Device: mps
+
+START OF GENERATION:
+The Cat in the hat these,!sad,Shetips  had
+
+Location Matches: 0
+Hobby Matches: 0
+Exact Matches: 0

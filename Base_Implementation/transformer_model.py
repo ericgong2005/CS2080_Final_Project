@@ -22,24 +22,25 @@ from DataConstants import NAMES, ASSIGNMENTS
 # layer_count = 4
 # dropout_rate = 0.2
 batch_size = 16
-block_size = 32
-iterations = 500
-iteration_checkpoint = 5
+block_size = 8
+iterations = 100
+iteration_checkpoint = 1
 learning_rate = 1e-3
 device = "mps" if torch.backends.mps.is_available() else 'cpu' # For MacOS GPU acceleration
-loss_evaluation_iterations = 16
-embedding_count = 64
+loss_evaluation_iterations = 1
+embedding_count = 32
 head_count = 4
 layer_count = 4
 dropout_rate = 0.2
-
+momentum = 0.9
+optimizer_name = "SGD" # "AdamW"
 
 torch.manual_seed(2080)
 
 print(f"Using {device}\n")
 
 # Import the text for training the model
-with open('Pattern_Training_Data.txt', 'r', encoding='utf-8') as f:
+with open('seuss_works.txt', 'r', encoding='utf-8') as f:
     training_text = f.read()
 
 def splitter(text : str) -> list[str]:
@@ -261,19 +262,22 @@ parameter_count = sum(p.numel() for p in m.parameters())
 print("Number of parameters: ", parameter_count, "\n")
 
 # create a PyTorch optimizer
-optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+if optimizer_name == "SGD":
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum)
+elif optimizer_name == "AdamW":
+ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
 train_losses = []
 val_losses = []
 iteration_steps = []
-loss_text = ["Iterations\tTraining_Loss\tValidation_Loss"]
+loss_text = ["epoch,train_loss,val_loss,epsilon"]
 
 for iter in range(iterations):
 
     # Periodically evaluate the loss on train and val sets
     if iter % iteration_checkpoint == 0:
         losses = estimate_loss()
-        loss_text.append(f"{iter}\t{losses['training']:.6f}\t{losses['validation']:.6f}")
+        loss_text.append(f"{iter},{losses['training']},{losses['validation']},0")
         print(f"step {iter}: train loss {losses['training']:.4f}, val loss {losses['validation']:.4f}")
         train_losses.append(losses["training"])
         val_losses.append(losses["validation"])
@@ -291,7 +295,7 @@ for iter in range(iterations):
 current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
 
 os.makedirs("Transformer_model_loss_data", exist_ok=True)
-with open(f"Transformer_model_loss_data/transformer_loss_{current_time}.txt", "w") as file:
+with open(f"Transformer_model_loss_data/transformer_loss_{current_time}.csv", "w") as file:
         for line in loss_text:
             file.write(line + "\n")
 
@@ -328,28 +332,35 @@ location_matches = 0
 hobby_matches = 0
 exact_matches = 0
 
-# generate from the model
-for name in NAMES:
-    start_string = f"{name} lives in"
+start_string = "The Cat in the hat"
 
-    context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
-    generation = full_decode(decoder(m.generate(context, max_new_tokens=12)[0].tolist()))
+context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+generation = full_decode(decoder(m.generate(context, max_new_tokens=12)[0].tolist()))
 
-    words = generation.split(" ")
-    print(words[3], words[6])
-    if words[3] == ASSIGNMENTS[name]["location"]:
-        location_matches = location_matches + 1
-    if words[6] == ASSIGNMENTS[name]["hobby"]:
-        hobby_matches = hobby_matches + 1
-    if words[3] == ASSIGNMENTS[name]["location"] and words[6] == ASSIGNMENTS[name]["hobby"]:
-        exact_matches = exact_matches + 1
+generations.append(generation)
 
-    print(generation)
-    generations.append(generation)
+# # generate from the model
+# for name in NAMES:
+#     start_string = f"{name} lives in"
 
-print("Location Matches:", location_matches)
-print("Hobby Matches:", hobby_matches)
-print("Exact Matches:", exact_matches)
+#     context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+#     generation = full_decode(decoder(m.generate(context, max_new_tokens=12)[0].tolist()))
+
+#     words = generation.split(" ")
+#     print(words[3], words[6])
+#     if words[3] == ASSIGNMENTS[name]["location"]:
+#         location_matches = location_matches + 1
+#     if words[6] == ASSIGNMENTS[name]["hobby"]:
+#         hobby_matches = hobby_matches + 1
+#     if words[3] == ASSIGNMENTS[name]["location"] and words[6] == ASSIGNMENTS[name]["hobby"]:
+#         exact_matches = exact_matches + 1
+
+#     print(generation)
+#     generations.append(generation)
+
+# print("Location Matches:", location_matches)
+# print("Hobby Matches:", hobby_matches)
+# print("Exact Matches:", exact_matches)
 
 os.makedirs("Transformer_model_generations", exist_ok=True)
 with open(f"Transformer_model_generations/transformer_generation_{current_time}.txt", "w") as f:
@@ -362,6 +373,7 @@ with open(f"Transformer_model_generations/transformer_generation_{current_time}.
                         f"\tHeads: {iterations}\n"
                         f"\tLayers: {layer_count}\n"
                         f"\tParameters: {parameter_count}\n"
+                        f"\Optimizer: {optimizer_name}\n"
                         f"\tDevice: {device}\n\n"))
     for generation in generations:
         f.write("START OF GENERATION:\n")
