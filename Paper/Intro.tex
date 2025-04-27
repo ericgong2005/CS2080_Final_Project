@@ -1,0 +1,49 @@
+\documentclass{article}
+\usepackage{amsmath,amssymb}
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{fullpage}
+\usepackage{hyperref}
+
+% Define theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
+
+\title{Evaluating the Efficacy of Differentially Private Stochastic Gradient Descent implementations for Pre-training Large Language Models}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+
+\subsection{background}
+
+Large Language Models (LLMs), built upon the transformer network architecture \cite{vaswani2023}, have gained immense popularity in recent years, holding promise of greatly revolutionizing both academia and industry, increasing efficiency, replacing menial tasks, even supplementing the innovation and ideation traditionally limited to the most creative and ingenious human intellect. The immense applicability and generalizability of LLMs can be accredited to its vast swaths of training data. In fact, Chinchilla Scaling laws even quantify the fact that there exist predictable, measureable improvement in model generations as training data quantity increases \cite{hoffmann2022}. So as to gather and utilize immense corpuses of text-based data for training models, companies turn towards scraping the internet for human-generated text. However, as the quantity of text increases, it quickly becomes intractable to fully screen and vet all text used to train the LLMs. 
+
+Among data scraped from the internet, there are undoutedly samples problematic statements, and of potentially sensitive information. The former has been combatted with fine-tunning; after a model is pre-trained on vast swathes of internet text, specific frameworks are introduced to fine-tune the LLM, tweaking model weights to remove unfavorable, incoherent, and problematic generations from the LLMs lexicon \cite{parthasarathy2024}. However, fine-tuning only serves to suppress such problematic generations, and cannot guarantee removal, with prompt hacking methodologies demonstrating that it is trivially feasible to coerce language models into generating outputs which are intentionally suppresed by its developers \cite{rababah2024}. Such methodolgies could be equally applied to exposing private and sensitive information inadvertently incorperated into the LLMs training data. 
+
+Unlearning--the process of removing the influence of undesirable information from an LLM without impacting unrelated information--has been explored as a potential solution to this dilemma \cite{liu2024}. However, unlearning primarily targets known, identified instances of undesirable information. Sensitive information that is not discovered and unlearned can remain indefinitely. This, in conjunction with the prevalence of LLMs memorizing and  regurgitating text found in training data verbatim \cite{hartmann2023} thus poses a severe security risk and privacy violation \cite{menta2025}.
+
+As such, it becomes critical to identifying methodologies by which it becomes possible to restrict the influence of undesirable information at training time, without external classification or detection of undesirability. Thus enters differential privacy, a field of study which not only proposes rigorous and quantitative definitions of privacy, but also provable guarantees for privacy preservation, making it a widely accepted gold standard for the purposes of statistical analysis and release of datasets \cite{fioretto2024}. Treating the training of an LLM as a form of data aggregation and release then, it becomes possible to utilize differential privacy to design and deliver guarantees which bound the extent to which any particular instance of undesirable information can influence generations elicited from the model. 
+
+\subsection{Differentially Private Stochastic Gradient Descent}
+
+In the context of LLMs, model parameters are adjusted based on training data to minimze a loss function which represents conformity to the training data. The most commonly used mechanism of minimizing the loss function is Stochastic Gradient Descent (SGD). As such, SGD can be treated as the process by which data and private information is used to influence the model parameters, which are ultimately used in inference and the generation of output, making it a primary target for differentially private frameworks, which would enable developers and researchers to bound the influence of any particular training example on the overall model weights. Thus is differentially private SGD (DP-SGD), first proposed by Abadi et al. in 2016\ \cite{abadi2016}. 
+
+INSERT MATHS HERE
+
+
+Thus, DP-SGD, while a powerful technique capable of creating provable and quantifiable privacy gurantees on the influence of training data on machine learning models, is not without drawbacks. In particular, the process of gradient clipping, and the addition of random noise not only increases computational overhead in an already computationally demanding workflow, but also degrades the quality of the resulting model, if given the same hyperparameters \cite{papernot2017}. In particular, previous research has shown that to mitigate the degredation of generations caused by DP-SGD, and reach the same level of performance, it becomes necessary to train the model for more iterations, resulting in an increase in computational costs \cite{mcmahan2018}.
+
+In this work, we aim to quantify the extent to which DP-SGD impacts model training and performance, by examining and comparing various implementations of DP-SGD with a non-DP SGD optimizer. So as to examine the impact of DP-SGD in a controlled environment, we opt to train a simple transformer model implementation from scratch, utilizing toy training data examples to evaluate the model across different circumstances.
+
+\section{Methodology}
+
+TODO
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\end{document}

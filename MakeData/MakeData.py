@@ -4,14 +4,17 @@ import sys
 
 from DataConstants import NAMES, LOCATIONS, HOBBIES
 
+LOCATION_NUM = 5 # Number of locations to use
+HOBBIES_NUM = 5 # Number of hobbies to use
+
 def assign():
     print("Number of Names: ", len(NAMES),
-          "\nNumber of Locations: ", len(LOCATIONS),
-          "\nNumber of Hobbies: ", len(HOBBIES))
+          "\nNumber of Locations: ", len(LOCATIONS[:LOCATION_NUM]),
+          "\nNumber of Hobbies: ", len(HOBBIES[:HOBBIES_NUM]))
     assignments = {
         name: {
-            "location": random.choice(LOCATIONS),
-            "hobby": random.choice(HOBBIES)
+            "location": random.choice(LOCATIONS[:LOCATION_NUM]),
+            "hobby": random.choice(HOBBIES[:HOBBIES_NUM])
         }
         for name in NAMES
     }
@@ -26,16 +29,15 @@ def data():
         assignments = json.load(f)
     
     lines = []
-    # Use the name Control1 through Control3 to instantiate all possible permutations
-    for location in LOCATIONS:
-        for hobby in HOBBIES:
-            for i in range(1,4):
-                sentence = template.format(
-                    name=f"Constant{i}",
-                    location=location,
-                    hobby=hobby
-                )
-                lines.append(sentence)
+    # Use the name Constant to instantiate all possible permutations
+    # for location in LOCATIONS[:LOCATION_NUM]:
+    #     for hobby in HOBBIES[:HOBBIES_NUM]:
+    #         sentence = template.format(
+    #             name=f"Constant",
+    #             location=location,
+    #             hobby=hobby
+    #         )
+    #         lines.append(sentence)
     
     # Now the actual individuals
     for name, info in assignments.items():
