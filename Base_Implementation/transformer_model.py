@@ -7,6 +7,8 @@ import os
 import matplotlib.pyplot as plt
 from datetime import datetime
 
+from DataConstants import NAMES, ASSIGNMENTS
+
 # hyperparameters
 # batch_size = 64
 # block_size = 128
@@ -20,23 +22,24 @@ from datetime import datetime
 # layer_count = 4
 # dropout_rate = 0.2
 batch_size = 16
-block_size = 8
-iterations = 100
+block_size = 32
+iterations = 500
 iteration_checkpoint = 5
-learning_rate = 1e-2
+learning_rate = 1e-3
 device = "mps" if torch.backends.mps.is_available() else 'cpu' # For MacOS GPU acceleration
-loss_evaluation_iterations = 4
+loss_evaluation_iterations = 16
 embedding_count = 64
-head_count = 1
-layer_count = 1
+head_count = 4
+layer_count = 4
 dropout_rate = 0.2
 
-torch.manual_seed(1234)
+
+torch.manual_seed(2080)
 
 print(f"Using {device}\n")
 
 # Import the text for training the model
-with open('seuss_works.txt', 'r', encoding='utf-8') as f:
+with open('Pattern_Training_Data.txt', 'r', encoding='utf-8') as f:
     training_text = f.read()
 
 def splitter(text : str) -> list[str]:
@@ -44,19 +47,14 @@ def splitter(text : str) -> list[str]:
     split = re.findall(pattern, text)
     formatted = []
     for word in split:
-        if word.istitle():
-            formatted.append("<C>")
-            formatted.append(word.lower())
-        elif word.isupper():
-            formatted.append("<A>")
-            formatted.append(word.lower())
-        else:
-            formatted.append(word)
+        formatted.append(word)
     return formatted
 
 formatted = splitter(training_text)
 
 unique = set(formatted)
+
+print("Total unique words: ", len(unique))
 
 training_data = formatted
 tokens = unique
@@ -268,12 +266,14 @@ optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 train_losses = []
 val_losses = []
 iteration_steps = []
+loss_text = ["Iterations\tTraining_Loss\tValidation_Loss"]
 
 for iter in range(iterations):
 
     # Periodically evaluate the loss on train and val sets
     if iter % iteration_checkpoint == 0:
         losses = estimate_loss()
+        loss_text.append(f"{iter}\t{losses['training']:.6f}\t{losses['validation']:.6f}")
         print(f"step {iter}: train loss {losses['training']:.4f}, val loss {losses['validation']:.4f}")
         train_losses.append(losses["training"])
         val_losses.append(losses["validation"])
@@ -288,8 +288,14 @@ for iter in range(iterations):
     loss.backward()
     optimizer.step()
 
-# Plot the Training and Validation Loss
 current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+
+os.makedirs("Transformer_model_loss_data", exist_ok=True)
+with open(f"Transformer_model_loss_data/transformer_loss_{current_time}.txt", "w") as file:
+        for line in loss_text:
+            file.write(line + "\n")
+
+# Plot the Training and Validation Loss
 plt.figure(figsize=(10, 6))
 plt.plot(iteration_steps, train_losses, label='Training Loss')
 plt.plot(iteration_steps, val_losses, label='Validation Loss')
@@ -317,16 +323,34 @@ os.makedirs("Transformer_model_loss_plots", exist_ok=True)
 plt.savefig(f"Transformer_model_loss_plots/transformer_loss_{current_time}.png")
 plt.close()
 
+generations = []
+location_matches = 0
+hobby_matches = 0
+exact_matches = 0
+
 # generate from the model
-start_string = "The cat in the hat"
+for name in NAMES:
+    start_string = f"{name} lives in"
 
-context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+    context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+    generation = full_decode(decoder(m.generate(context, max_new_tokens=12)[0].tolist()))
 
-generation = full_decode(decoder(m.generate(context, max_new_tokens=100)[0].tolist()))
+    words = generation.split(" ")
+    print(words[3], words[6])
+    if words[3] == ASSIGNMENTS[name]["location"]:
+        location_matches = location_matches + 1
+    if words[6] == ASSIGNMENTS[name]["hobby"]:
+        hobby_matches = hobby_matches + 1
+    if words[3] == ASSIGNMENTS[name]["location"] and words[6] == ASSIGNMENTS[name]["hobby"]:
+        exact_matches = exact_matches + 1
 
-print(generation)
+    print(generation)
+    generations.append(generation)
 
-current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+print("Location Matches:", location_matches)
+print("Hobby Matches:", hobby_matches)
+print("Exact Matches:", exact_matches)
+
 os.makedirs("Transformer_model_generations", exist_ok=True)
 with open(f"Transformer_model_generations/transformer_generation_{current_time}.txt", "w") as f:
     f.write((f"PROPERTIES:\n"
@@ -339,5 +363,11 @@ with open(f"Transformer_model_generations/transformer_generation_{current_time}.
                         f"\tLayers: {layer_count}\n"
                         f"\tParameters: {parameter_count}\n"
                         f"\tDevice: {device}\n\n"))
-    f.write("START OF GENERATION:")
-    f.write(generation)
+    for generation in generations:
+        f.write("START OF GENERATION:\n")
+        f.write(generation)
+        f.write("\n\n")
+    
+    f.write(f"Location Matches: {location_matches}\n")
+    f.write(f"Hobby Matches: {hobby_matches}\n")
+    f.write(f"Exact Matches: {exact_matches}\n")

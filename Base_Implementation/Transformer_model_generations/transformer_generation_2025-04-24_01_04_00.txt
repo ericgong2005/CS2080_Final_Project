@@ -1,0 +1,31 @@
+PROPERTIES:
+	Batch size: 16
+	Block size: 32
+	Iterations: 1000
+	Learning rate: 0.001
+	Embeddings: 4
+	Heads: 1000
+	Layers: 4
+	Parameters: 59190
+	Device: mps
+
+START OF GENERATION:
+Lincoln lives in Barcelona and enjoys gardening.
+
+
+START OF GENERATION:
+Oliver lives in London and enjoys reading.
+
+
+START OF GENERATION:
+Anthony lives in Paris and enjoys drawing.
+
+
+START OF GENERATION:
+Carter lives in London and enjoys cycling.
+
+
+START OF GENERATION:
+Aria lives in Barcelona and enjoys cycling.
+
+

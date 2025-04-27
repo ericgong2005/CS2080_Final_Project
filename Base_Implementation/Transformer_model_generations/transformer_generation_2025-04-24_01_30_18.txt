@@ -1,0 +1,370 @@
+PROPERTIES:
+	Batch size: 16
+	Block size: 32
+	Iterations: 100
+	Learning rate: 0.001
+	Embeddings: 4
+	Heads: 100
+	Layers: 4
+	Parameters: 216437
+	Device: mps
+
+START OF GENERATION:
+Liam lives in in Tokyo  and enjoys Leah 
+
+START OF GENERATION:
+Olivia lives in David Barcelona Tokyo and enjoys painting
+
+START OF GENERATION:
+Noah lives in Barcelona and enjoys enjoys gardeningenjoys 
+
+START OF GENERATION:
+Emma lives in Barcelona and enjoys reading.
+Caroline 
+
+START OF GENERATION:
+Oliver lives in Tokyo in Jackson Barcelonain Paris 
+
+START OF GENERATION:
+Ava lives in Sydney and enjoys .
+Leah lives
+
+START OF GENERATION:
+Elijah lives in Tokyo and enjoys enjoys Paisleyand 
+
+START OF GENERATION:
+Sophia lives inin Paris enjoys gardening.
+Madison lives
+
+START OF GENERATION:
+William lives in drawing.
+Mason  lives Barcelona and
+
+START OF GENERATION:
+Isabella lives in lives in Aubrey Paris enjoysLucas 
+
+START OF GENERATION:
+James lives in Nova.
+Anthony lives in TokyoEthan
+
+START OF GENERATION:
+Mia lives in Evelyn in Barcelona reading.Grayson in
+
+START OF GENERATION:
+Benjamin lives in Paris enjoys .Harper Hazel reading.
+
+START OF GENERATION:
+Charlotte lives in Levi cycling.
+Samuel enjoys drawing.
+
+START OF GENERATION:
+Lucas lives inMila Paris and lives enjoys lives 
+
+START OF GENERATION:
+Amelia lives in and reading.
+Sophia lives in 
+
+START OF GENERATION:
+Henry lives in Olivia cyclingBella Levi lives in 
+
+START OF GENERATION:
+Harper lives in Barcelona and enjoys cycling.Ezra lives
+
+START OF GENERATION:
+Alexander lives in Savannahin Lucy Paris London Tokyo 
+
+START OF GENERATION:
+Evelyn lives in Paris and enjoys painting.
+Evelyn 
+
+START OF GENERATION:
+Mason lives in London and enjoys lives and 
+
+
+START OF GENERATION:
+Abigail lives in Paris Barcelona Olivia and enjoys drawing
+
+START OF GENERATION:
+Michael lives in and enjoys cycling.
+Ethan lives 
+
+START OF GENERATION:
+Emily lives in London and enjoys reading. enjoys 
+
+START OF GENERATION:
+Ethan lives in Paris.
+Harper
+Matthew lives in 
+
+START OF GENERATION:
+Elizabeth lives in Barcelona Riley and enjoys Levi London
+
+START OF GENERATION:
+Daniel lives in Elizabeth Tokyo and enjoys cycling.and
+
+START OF GENERATION:
+Sofia lives in in enjoys Zoe reading.
+Joseph 
+
+START OF GENERATION:
+Jacob lives in Barcelona
+Addison and enjoys gardening.
+
+
+START OF GENERATION:
+Madison lives in in and enjoys reading.
+Theodore 
+
+START OF GENERATION:
+Logan lives in Barcelona Paris and  enjoys
+Lucas 
+
+START OF GENERATION:
+Avery lives in Sydney and enjoys enjoys cycling. 
+
+START OF GENERATION:
+Jackson lives in Jayden Julian Mia enjoys painting.
+
+
+START OF GENERATION:
+Ella lives in and enjoys painting.
+Christopher painting.
+
+START OF GENERATION:
+Levi lives in Mateo in Sydney and enjoys cycling
+
+START OF GENERATION:
+Scarlett lives in and enjoys painting.
+Aurora Christopher 
+
+START OF GENERATION:
+Sebastian lives inSophia Sydney enjoys drawing.
+Emma enjoys
+
+START OF GENERATION:
+Grace lives inMadison in Sydney andlives enjoys lives
+
+START OF GENERATION:
+Mateo lives in Lincoln Tokyo and enjoys Emma drawing
+
+START OF GENERATION:
+Chloe lives in Tokyo and enjoys enjoys enjoys Elizabeth
+
+START OF GENERATION:
+Jack lives in inand enjoys reading.
+Wyatt lives
+
+START OF GENERATION:
+Victoria lives in Sydney and enjoys reading.
+Owen 
+
+START OF GENERATION:
+Owen lives in and Aurora reading.
+Emily enjoysCharles
+
+START OF GENERATION:
+Riley lives in Paris Paris and enjoys cycling.
+
+
+START OF GENERATION:
+Theodore lives in Eleanor Paris and enjoys enjoys cycling
+
+START OF GENERATION:
+Aria lives in London Barcelona enjoys lives Everly in
+
+START OF GENERATION:
+Aiden lives in in Tokyo lives and enjoys Sebastian
+
+START OF GENERATION:
+Lily lives in Sydney and enjoys cycling.
+Thomas 
+
+START OF GENERATION:
+Samuel lives in Sydney and Sydney .
+Julian .
+
+START OF GENERATION:
+Nora lives in cycling.
+Leo lives in Gabriel 
+
+START OF GENERATION:
+Joseph lives in Sydney in drawing.
+Benjamin Sydney 
+
+START OF GENERATION:
+Zoey lives in London and enjoys enjoysin Lincoln 
+
+START OF GENERATION:
+John lives in in Paris lives andin Paris 
+
+START OF GENERATION:
+Mila lives in lives lives in Tokyo and enjoys
+
+START OF GENERATION:
+David lives in gardeningenjoysNora.
+Mila.
+Dylan lives
+
+START OF GENERATION:
+Aubrey lives in Paris enjoys Lucy in Tokyo Tokyo
+
+START OF GENERATION:
+Wyatt lives in in in Barcelona and enjoys painting
+
+START OF GENERATION:
+Hannah lives in Paris andAiden enjoys reading.
+Julian
+
+START OF GENERATION:
+Matthew lives in Elijah.
+Grayson lives in.
+Julian
+
+START OF GENERATION:
+Addison lives in Daniel Parisand enjoys drawingJackson drawing
+
+START OF GENERATION:
+Luke lives in Paris Barcelona and enjoys and enjoys
+
+START OF GENERATION:
+Eleanor lives in in and enjoysEzra lives in 
+
+START OF GENERATION:
+Asher lives in Paris and enjoys .
+Lucy lives
+
+START OF GENERATION:
+Natalie lives in lives in Tokyo and enjoys Savannah
+
+START OF GENERATION:
+Carter lives in enjoys painting.
+Addison  and enjoys
+
+START OF GENERATION:
+Stella lives in Tokyo and enjoys  lives in 
+
+START OF GENERATION:
+Julian lives in Paris and Owen enjoysand readingdrawing
+
+START OF GENERATION:
+Zoe lives in Sydney andlives.
+Charles enjoys London
+
+START OF GENERATION:
+Grayson lives in in Sydney and enjoys gardening.
+
+
+START OF GENERATION:
+Leah lives in Tokyo .
+Skylar lives in Sydney
+
+START OF GENERATION:
+Leo lives in London and enjoys reading.
+MateoJosiah
+
+START OF GENERATION:
+Hazel lives in Sydney Amelia and enjoys reading.
+
+
+START OF GENERATION:
+Jayden lives in gardening.
+Jack enjoys lives in 
+
+START OF GENERATION:
+Violet lives in in drawing.
+Nora Josiah and 
+
+START OF GENERATION:
+Gabriel lives in and  reading.
+Josiahin Tokyo 
+
+START OF GENERATION:
+Aurora lives in gardening.
+Aurora .
+Josiah lives 
+
+START OF GENERATION:
+Isaac lives inAsher Sydney and gardeningNora enjoys cycling
+
+START OF GENERATION:
+Savannah lives in Paris and enjoys.
+Skylar .
+
+
+START OF GENERATION:
+Lincoln lives in Aurora Paris and enjoys Isabella Carter
+
+START OF GENERATION:
+Audrey lives in Christopher in in Paris and enjoys
+
+START OF GENERATION:
+Anthony lives in and enjoys Madison enjoys cycling.
+
+
+START OF GENERATION:
+Brooklyn lives in Lucy Tokyo painting.
+Nora Sophia 
+
+START OF GENERATION:
+Hudson lives in and and enjoys Barcelona enjoys drawing
+
+START OF GENERATION:
+Bella lives in and  enjoys Jayden readingenjoys gardening
+
+START OF GENERATION:
+Dylan lives in London Claire and lives enjoys cycling
+
+START OF GENERATION:
+Claire lives in Barcelona Barcelona in in Luke Barcelona
+
+START OF GENERATION:
+Ezra lives in Barcelona Sydney Zoelives and enjoys 
+
+START OF GENERATION:
+Skylar lives in London in reading.
+Mason Barcelona 
+
+START OF GENERATION:
+Thomas lives in cyclingMichael in Paris Paris  lives
+
+START OF GENERATION:
+Lucy lives in lives in Levi Paris enjoys drawing
+
+START OF GENERATION:
+Charles lives in London and .in reading.
+Anthony
+
+START OF GENERATION:
+Paisley lives inAria
+Henryin Paris and Tokyo  
+
+START OF GENERATION:
+Christopher lives in Anna Paris  reading.Mason .
+
+
+START OF GENERATION:
+Everly lives in painting. and gardening.
+Christopher in
+
+START OF GENERATION:
+Jaxon lives in andHarper enjoys drawingNatalie reading.
+
+
+START OF GENERATION:
+Anna lives in Dylan Paris lives Barcelona and enjoys
+
+START OF GENERATION:
+Maverick lives in and lives enjoys Levi Leah reading
+
+START OF GENERATION:
+Caroline lives in David Evelyn Barcelona Dylan and enjoys
+
+START OF GENERATION:
+Josiah lives inlives London enjoys Londonin Joseph lives
+
+START OF GENERATION:
+Nova lives in Christopher Wyatt Sydney and enjoys reading
+
+Location Matches: 9
+Hobby Matches: 0
+Exact Matches: 0
