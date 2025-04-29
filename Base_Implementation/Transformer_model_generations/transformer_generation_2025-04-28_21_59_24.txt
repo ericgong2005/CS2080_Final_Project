@@ -7,11 +7,12 @@ PROPERTIES:
 	Heads: 100
 	Layers: 4
 	Parameters: 73307
-\Optimizer: SGD
+	Optimizer: AdamW
 	Device: mps
 
 START OF GENERATION:
-The Cat in the hat these,!sad,Shetips  had
+The Cat in the hat
+handsA looklitcanup Goodgood,
 
 Location Matches: 0
 Hobby Matches: 0

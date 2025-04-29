@@ -33,7 +33,7 @@ head_count = 4
 layer_count = 4
 dropout_rate = 0.2
 momentum = 0.9
-optimizer_name = "SGD" # "AdamW"
+optimizer_name = "AdamW" # "AdamW" or "SGD"
 
 torch.manual_seed(2080)
 
@@ -373,7 +373,7 @@ with open(f"Transformer_model_generations/transformer_generation_{current_time}.
                         f"\tHeads: {iterations}\n"
                         f"\tLayers: {layer_count}\n"
                         f"\tParameters: {parameter_count}\n"
-                        f"\Optimizer: {optimizer_name}\n"
+                        f"\tOptimizer: {optimizer_name}\n"
                         f"\tDevice: {device}\n\n"))
     for generation in generations:
         f.write("START OF GENERATION:\n")

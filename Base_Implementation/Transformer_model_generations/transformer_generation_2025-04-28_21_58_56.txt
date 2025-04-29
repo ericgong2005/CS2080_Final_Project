@@ -7,10 +7,11 @@ PROPERTIES:
 	Heads: 100
 	Layers: 4
 	Parameters: 73307
+	Optimizer: SGD
 	Device: mps
 
 START OF GENERATION:
-The Cat in the hat Thing saw playthings was Her  
+The Cat in the hat dotsTherewith . and ball last
 
 Location Matches: 0
 Hobby Matches: 0
