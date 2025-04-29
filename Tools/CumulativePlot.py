@@ -47,7 +47,7 @@ def main():
     plt.grid(True)
     plt.tight_layout()
     current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
-    plt.savefig(f"Epsilon_{epsilon}_Cumulative_Comparison_{current_time}.png", dpi=300)
+    plt.savefig(f"Epsilon_{epsilon}_{loss_type}_Cumulative_Comparison_{current_time}.png", dpi=300)
     plt.close()
 
 if __name__ == "__main__":
