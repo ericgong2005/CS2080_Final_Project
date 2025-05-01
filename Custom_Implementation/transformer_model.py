@@ -5,8 +5,13 @@ from torch.nn import functional as F
 import re
 import os
 import matplotlib.pyplot as plt
+import math
+import string
+import csv, pathlib, random
 from datetime import datetime
-from optim import DPSGD  # <-- add at the top
+from optim import DPSGD
+RUN_TAG = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") 
+
 
 # hyperparameters
 # batch_size = 64
@@ -23,18 +28,52 @@ from optim import DPSGD  # <-- add at the top
 batch_size = 16
 block_size = 8
 iterations = 100
-iteration_checkpoint = 5
+iteration_checkpoint = 1
 learning_rate = 1e-2
 device = "mps" if torch.backends.mps.is_available() else 'cpu' # For MacOS GPU acceleration
 loss_evaluation_iterations = 4
 embedding_count = 64
-head_count = 1
-layer_count = 1
+head_count = 4
+layer_count = 4
 dropout_rate = 0.2
 
 torch.manual_seed(1234)
 
 print(f"Using {device}\n")
+
+def pretty_join(tokens: list[str]) -> str:
+    """Insert spaces between tokens where needed and tidy punctuation."""
+    out = []
+    for tok in tokens:
+        if tok.isspace():
+            out.append(tok)
+        elif tok in string.punctuation:
+            if out and out[-1].endswith(' '):
+                out[-1] = out[-1].rstrip()
+            out.append(tok)
+        else:                           # ordinary word
+            if out and not out[-1].endswith((' ', '\n')):
+                out.append(' ')
+            out.append(tok)
+    return ''.join(out)
+
+def apply_case(tokens: list[str]) -> list[str]:
+    """Handle <C>/<A> markers produced by splitter()."""
+    out, mode = [], 0                  # 0 = normal, 1 = capitalise, 2 = upper
+    for t in tokens:
+        if t == "<C>":
+            mode = 1
+        elif t == "<A>":
+            mode = 2
+        else:
+            if mode == 1:
+                out.append(t.capitalize())
+            elif mode == 2:
+                out.append(t.upper())
+            else:
+                out.append(t)
+            mode = 0
+    return out
 
 # Import the text for training the model
 with open('seuss_works.txt', 'r', encoding='utf-8') as f:
@@ -266,101 +305,209 @@ print("Number of parameters: ", parameter_count, "\n")
 # create a PyTorch optimizer
 #optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-optimizer = DPSGD(
-    named_params=list(model.named_parameters()),
-    lot_size=batch_size,
-    lr=learning_rate,
-    noise_scale=4,        # ← set to 0.0 for no-DP baseline
-    max_grad_norm=1.0,
-    weight_decay=0.0
-)
 
+def sigma_from_epsilon(eps, delta, q, T):
+    # Moments-accountant bound, roughly tight (c≈1.2 from Abadi et al.)
+    c = 1.12
+    return c * q * math.sqrt(T * math.log(1/delta)) / eps
+
+q = batch_size / len(data)        # sampling ratio
+T = iterations                    # total optimizer steps
+target_epsilons = [50]
+delta = 1e-4
 
 train_losses = []
 val_losses = []
 iteration_steps = []
 
-#THIS FUNCTION IS LLM EDITED!
-for iter in range(iterations):
+def run_one_trial(eps, trial_id=1):
+    # 1  reset the model and RNG
+    torch.manual_seed(1234 + trial_id)
+    random.seed(1234 + trial_id)
+    model.apply(model._init_weights)        # re-initialise weights
 
-    # Periodically evaluate the loss on train and val sets
-    if iter % iteration_checkpoint == 0:
-        losses = estimate_loss()
-        print(f"step {iter}: train loss {losses['training']:.4f}, val loss {losses['validation']:.4f}")
-        train_losses.append(losses["training"])
-        val_losses.append(losses["validation"])
-        iteration_steps.append(iter)
+    # 2  compute sigma and create a fresh optimiser
+    sigma = sigma_from_epsilon(
+        eps, delta=1e-4,
+        q=batch_size / len(data),
+        T=iterations,
+    )
+    print(f"ε={eps:<4} σ={sigma:.6f}")          # ← prints σ to console
+    optimizer = DPSGD(
+        named_params=list(model.named_parameters()),
+        lot_size=batch_size,
+        lr=learning_rate,
+        noise_scale=sigma,      
+        max_grad_norm=1.0,
+        weight_decay=0.0
+    )
 
-    # sample a batch of data
-    xb, yb = get_batch('training')
+    # 3  prepare logging
+    #csv_path = pathlib.Path("runs") / f"eps{eps}_trial{trial_id}.csv"
+    csv_path = pathlib.Path("runs") / f"eps{eps}_trial{trial_id}_{RUN_TAG}.csv"
+    csv_path.parent.mkdir(exist_ok=True)
+    with csv_path.open("w", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["epoch", "train_loss", "val_loss", "epsilon"])
 
-    # compute per-sample gradients
-    per_sample_grads = {name: [] for name, param in model.named_parameters() if param.requires_grad}
-    for i in range(xb.size(0)):
-        model.zero_grad(set_to_none=True)
-        xi = xb[i].unsqueeze(0)
-        yi = yb[i].unsqueeze(0)
-        _, loss = model(xi, yi)
-        loss.backward()
-        for name, param in model.named_parameters():
-            if param.grad is not None:
-                per_sample_grads[name].append(param.grad.detach().clone())
-    per_sample_grads = {name: torch.stack(grads) for name, grads in per_sample_grads.items()}
+        train_losses.clear(); val_losses.clear(); iteration_steps.clear()
 
-    # step with DPSGD
-    optimizer.step(per_sample_grads)
+        # 4  train
+        for it in range(iterations):
+            if it % iteration_checkpoint == 0:
+                losses = estimate_loss()
+                writer.writerow([it,
+                                 losses["training"].item(),
+                                 losses["validation"].item(),
+                                 eps])
+                print(f"ε={eps} it={it}: "
+                      f"train {losses['training']:.4f}  "
+                      f"val  {losses['validation']:.4f}")
+                iteration_steps.append(it)
+                train_losses.append(losses["training"].item())
+                val_losses.append(losses["validation"].item())
 
 
-# Plot the Training and Validation Loss
-current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
-plt.figure(figsize=(10, 6))
-plt.plot(iteration_steps, train_losses, label='Training Loss')
-plt.plot(iteration_steps, val_losses, label='Validation Loss')
-plt.title('Training and Validation Loss')
-plt.xlabel('Iterations')
-plt.ylabel('Loss')
-plt.legend()
-plt.grid(True)
-hyperparameters_text = (f"Properties:\n"
-                        f"Batch size: {batch_size}\n"
-                        f"Block size: {block_size}\n"
-                        f"Iterations: {iterations}\n"
-                        f"Learning rate: {learning_rate}\n"
-                        f"Embeddings: {head_count}\n"
-                        f"Heads: {iterations}\n"
-                        f"Layers: {layer_count}\n"
-                        f"Parameters: {parameter_count}\n"
-                        f"Device: {device}\n")
+            # ---- compute per-sample gradients ----
+            xb, yb = get_batch('training')
+            per_sample_grads = {
+                name: [] for name, p in model.named_parameters() if p.requires_grad
+            }
+            for i in range(xb.size(0)):
+                model.zero_grad(set_to_none=True)
+                xi = xb[i].unsqueeze(0)
+                yi = yb[i].unsqueeze(0)
+                _, loss = model(xi, yi)
+                loss.backward()
+                for name, p in model.named_parameters():
+                    if p.grad is not None:
+                        per_sample_grads[name].append(p.grad.detach().clone())
+            per_sample_grads = {
+                name: torch.stack(g) for name, g in per_sample_grads.items()
+            }
 
-plt.text(0.95, 0.95, hyperparameters_text, transform=plt.gca().transAxes,
-         fontsize=10, verticalalignment='top', horizontalalignment='right',
-         bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
+            optimizer.step(per_sample_grads)
 
-os.makedirs("Transformer_model_loss_plots", exist_ok=True)
-plt.savefig(f"Transformer_model_loss_plots/transformer_loss_{current_time}.png")
-plt.close()
+        # 5  save loss-curve PNG
+        plt.figure(figsize=(8, 5))
+        plt.plot(iteration_steps, train_losses, label="train")
+        plt.plot(iteration_steps, val_losses, label="val")
+        plt.xlabel("epoch")
+        plt.ylabel("loss")
+        plt.title(f"Loss curve – ε={eps}")
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(csv_path.with_suffix(".png"))
+        plt.close()
 
-# generate from the model
-start_string = "The cat in the hat"
 
-context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+    # 6  generate a short sample **for this ε-specific model**
+    start_string = "The cat in the hat"
+    context = torch.tensor(
+        encoder(splitter(start_string)),
+        dtype=torch.long, device=device
+    ).unsqueeze(0)
 
-generation = full_decode(decoder(m.generate(context, max_new_tokens=100)[0].tolist()))
+    raw_tokens   = decoder(model.generate(context, max_new_tokens=100)[0].tolist())
+    tokens_cased = apply_case(raw_tokens)
+    generation   = pretty_join(tokens_cased)
 
-print(generation)
+    ts = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+    gen_path = pathlib.Path("Transformer_model_generations") \
+                   / f"generation_eps{eps}_trial{trial_id}_{ts}.txt"
+    gen_path.parent.mkdir(exist_ok=True)
+    with gen_path.open("w") as g:
+        g.write(generation)
 
-current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
-os.makedirs("Transformer_model_generations", exist_ok=True)
-with open(f"Transformer_model_generations/transformer_generation_{current_time}.txt", "w") as f:
-    f.write((f"PROPERTIES:\n"
-                        f"\tBatch size: {batch_size}\n"
-                        f"\tBlock size: {block_size}\n"
-                        f"\tIterations: {iterations}\n"
-                        f"\tLearning rate: {learning_rate}\n"
-                        f"\tEmbeddings: {head_count}\n"
-                        f"\tHeads: {iterations}\n"
-                        f"\tLayers: {layer_count}\n"
-                        f"\tParameters: {parameter_count}\n"
-                        f"\tDevice: {device}\n\n"))
-    f.write("START OF GENERATION:")
-    f.write(generation)
+    print(f"\nSample for ε={eps} (saved to {gen_path}):\n{generation[:300]}...\n")
+
+
+# ---- MAIN LOOP ----
+for eid, eps in enumerate([1, 10, 20, 50], start=1):
+    run_one_trial(eps, trial_id=eid)
+
+
+# #THIS FUNCTION IS LLM EDITED!
+# for iter in range(iterations):
+
+#     # Periodically evaluate the loss on train and val sets
+#     if iter % iteration_checkpoint == 0:
+#         losses = estimate_loss()
+#         print(f"step {iter}: train loss {losses['training']:.4f}, val loss {losses['validation']:.4f}")
+#         train_losses.append(losses["training"])
+#         val_losses.append(losses["validation"])
+#         iteration_steps.append(iter)
+
+#     # sample a batch of data
+#     xb, yb = get_batch('training')
+
+#     # compute per-sample gradients
+#     per_sample_grads = {name: [] for name, param in model.named_parameters() if param.requires_grad}
+#     for i in range(xb.size(0)):
+#         model.zero_grad(set_to_none=True)
+#         xi = xb[i].unsqueeze(0)
+#         yi = yb[i].unsqueeze(0)
+#         _, loss = model(xi, yi)
+#         loss.backward()
+#         for name, param in model.named_parameters():
+#             if param.grad is not None:
+#                 per_sample_grads[name].append(param.grad.detach().clone())
+#     per_sample_grads = {name: torch.stack(grads) for name, grads in per_sample_grads.items()}
+
+#     # step with DPSGD
+#     optimizer.step(per_sample_grads)
+
+
+# # Plot the Training and Validation Loss
+# current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+# plt.figure(figsize=(10, 6))
+# plt.plot(iteration_steps, train_losses, label='Training Loss')
+# plt.plot(iteration_steps, val_losses, label='Validation Loss')
+# plt.title('Training and Validation Loss')
+# plt.xlabel('Iterations')
+# plt.ylabel('Loss')
+# plt.legend()
+# plt.grid(True)
+# hyperparameters_text = (f"Properties:\n"
+#                         f"Batch size: {batch_size}\n"
+#                         f"Block size: {block_size}\n"
+#                         f"Iterations: {iterations}\n"
+#                         f"Learning rate: {learning_rate}\n"
+#                         f"Embeddings: {head_count}\n"
+#                         f"Heads: {iterations}\n"
+#                         f"Layers: {layer_count}\n"
+#                         f"Parameters: {parameter_count}\n"
+#                         f"Device: {device}\n")
+
+# plt.text(0.95, 0.95, hyperparameters_text, transform=plt.gca().transAxes,
+#          fontsize=10, verticalalignment='top', horizontalalignment='right',
+#          bbox=dict(boxstyle='round', facecolor='white', alpha=0.5))
+
+# os.makedirs("Transformer_model_loss_plots", exist_ok=True)
+# plt.savefig(f"Transformer_model_loss_plots/transformer_loss_{current_time}.png")
+# plt.close()
+
+# # generate from the model
+# start_string = "The cat in the hat"
+
+# context = torch.tensor(encoder(splitter(start_string)), dtype=torch.long, device=device).unsqueeze(0)
+
+# generation = full_decode(decoder(m.generate(context, max_new_tokens=100)[0].tolist()))
+
+# print(generation)
+
+# current_time = datetime.now().strftime('%Y-%m-%d_%H_%M_%S')
+# os.makedirs("Transformer_model_generations", exist_ok=True)
+# with open(f"Transformer_model_generations/transformer_generation_{current_time}.txt", "w") as f:
+#     f.write((f"PROPERTIES:\n"
+#                         f"\tBatch size: {batch_size}\n"
+#                         f"\tBlock size: {block_size}\n"
+#                         f"\tIterations: {iterations}\n"
+#                         f"\tLearning rate: {learning_rate}\n"
+#                         f"\tEmbeddings: {head_count}\n"
+#                         f"\tHeads: {iterations}\n"
+#                         f"\tLayers: {layer_count}\n"
+#                         f"\tParameters: {parameter_count}\n"
+#                         f"\tDevice: {device}\n\n"))
+#     f.write("START OF GENERATION:")
+#     f.write(generation)
