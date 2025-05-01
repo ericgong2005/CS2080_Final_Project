@@ -348,7 +348,7 @@ def run_one_trial(eps, trial_id=1):
     csv_path.parent.mkdir(exist_ok=True)
     with csv_path.open("w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["iteration", "train_loss", "val_loss", "epsilon"])
+        writer.writerow(["epoch", "train_loss", "val_loss", "epsilon"])
 
         train_losses.clear(); val_losses.clear(); iteration_steps.clear()
 
@@ -392,7 +392,7 @@ def run_one_trial(eps, trial_id=1):
         plt.figure(figsize=(8, 5))
         plt.plot(iteration_steps, train_losses, label="train")
         plt.plot(iteration_steps, val_losses, label="val")
-        plt.xlabel("iteration")
+        plt.xlabel("epoch")
         plt.ylabel("loss")
         plt.title(f"Loss curve – ε={eps}")
         plt.legend()
