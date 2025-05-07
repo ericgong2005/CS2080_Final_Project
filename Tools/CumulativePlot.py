@@ -30,7 +30,7 @@ def main():
     file_paths = sys.argv[3:]
     file_paths = [os.path.join(file_dir, fp) for fp in file_paths]
 
-    labels = ["Normal SGD", "Normal AdamW", "Custom DP-SGD", "Opacus DP_SGD"]
+    labels = ["Normal SGD", "Normal AdamW", "Custom DP-SGD", "Opacus DP-SGD"]
 
     data = "train_loss" if loss_type == "Training" else "val_loss"
 
